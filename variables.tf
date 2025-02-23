@@ -199,3 +199,9 @@ variable "enable_key_rotation" {
   description = "Enable key rotation for KMS keys"
   default     = false
 }
+
+variable "compute_environment_allocation_strategy" {
+  type        = string
+  default     = "BEST_FIT"
+  description = "Allocation strategy for Batch Compute environment (BEST_FIT, BEST_FIT_PROGRESSIVE, SPOT_CAPACITY_OPTIMIZED)"
+}
