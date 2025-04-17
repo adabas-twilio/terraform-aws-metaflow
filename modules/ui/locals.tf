@@ -28,6 +28,8 @@ locals {
     "METAFLOW_SERVICE_URL"          = "http://localhost:8083/api/metadata"
     "METAFLOW_DEFAULT_DATASTORE"    = "s3"
     "METAFLOW_DEFAULT_METADATA"     = "service"
+    "MF_METADATA_DB_SSL_MODE"       = "prefer"
+    "UI_ENABLED"                    = "1"
   }
 
   default_ui_static_env_vars = {}

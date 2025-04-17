@@ -37,6 +37,7 @@ resource "aws_ecs_task_definition" "this" {
       {"name": "MF_METADATA_DB_PORT", "value": "5432"},
       {"name": "MF_METADATA_DB_PSWD", "value": "${var.database_password}"},
       {"name": "MF_METADATA_DB_USER", "value": "${var.database_username}"}
+      {"name": "MF_METADATA_DB_SSL_MODE", "value": "prefer"}
     ],
     "logConfiguration": {
         "logDriver": "awslogs",
