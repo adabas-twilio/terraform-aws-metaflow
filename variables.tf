@@ -108,6 +108,12 @@ variable "metadata_service_container_image" {
   description = "Container image for metadata service"
 }
 
+variable "backend_service_container_image" {
+  type        = string
+  default     = ""
+  description = "Container image for metadata service"
+}
+
 variable "metadata_service_enable_api_basic_auth" {
   type        = bool
   default     = true
