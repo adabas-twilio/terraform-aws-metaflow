@@ -67,11 +67,12 @@ EOF
 }
 
 resource "aws_ecs_service" "this" {
-  name            = "${var.resource_prefix}metadata-service${var.resource_suffix}"
-  cluster         = aws_ecs_cluster.this.id
-  task_definition = aws_ecs_task_definition.this.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
+  name                   = "${var.resource_prefix}metadata-service${var.resource_suffix}"
+  cluster                = aws_ecs_cluster.this.id
+  task_definition        = aws_ecs_task_definition.this.arn
+  desired_count          = 1
+  launch_type            = "FARGATE"
+  enable_execute_command = true
 
   network_configuration {
     security_groups  = [aws_security_group.metadata_service_security_group.id]
