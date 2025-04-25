@@ -15,6 +15,8 @@ module "metaflow-datastore" {
   db_instance_type  = var.db_instance_type
   db_engine_version = var.db_engine_version
 
+  s3_bucket_name = var.s3_bucket_name
+
   standard_tags = var.tags
 }
 

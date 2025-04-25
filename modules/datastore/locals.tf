@@ -6,5 +6,9 @@ locals {
   rds_security_group_name = "${var.resource_prefix}rds-security-group${var.resource_suffix}"
 
   # Name of S3 bucket
-  s3_bucket_name = "${var.resource_prefix}s3${var.resource_suffix}"
+  s3_bucket_name = (
+    var.s3_bucket_name == "" ?
+    "${var.resource_prefix}s3${var.resource_suffix}" :
+    var.s3_bucket_name
+  )
 }

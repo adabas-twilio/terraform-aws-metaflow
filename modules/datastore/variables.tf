@@ -71,3 +71,8 @@ variable "enable_key_rotation" {
   description = "Enable key rotation for KMS keys"
   default     = false
 }
+
+variable "s3_bucket_name" {
+  type    = string
+  default = ""
+}

@@ -211,3 +211,8 @@ variable "compute_environment_allocation_strategy" {
   default     = "BEST_FIT"
   description = "Allocation strategy for Batch Compute environment (BEST_FIT, BEST_FIT_PROGRESSIVE, SPOT_CAPACITY_OPTIMIZED)"
 }
+
+variable "s3_bucket_name" {
+  type    = string
+  default = ""
+}
