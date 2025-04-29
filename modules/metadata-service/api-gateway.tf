@@ -155,6 +155,9 @@ resource "aws_api_gateway_deployment" "this" {
   # ensures properly ordered re-deployments occur
   lifecycle {
     create_before_destroy = true
+    ignore_changes = [
+      deployment_id
+    ]
   }
 }
 
