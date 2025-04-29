@@ -156,7 +156,7 @@ resource "aws_api_gateway_deployment" "this" {
   lifecycle {
     create_before_destroy = true
     ignore_changes = [
-      deployment_id
+      aws_api_gateway_rest_api.this[0].deployment_id
     ]
   }
 }
