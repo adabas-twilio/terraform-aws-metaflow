@@ -155,9 +155,6 @@ resource "aws_api_gateway_deployment" "this" {
   # ensures properly ordered re-deployments occur
   lifecycle {
     create_before_destroy = true
-    ignore_changes = [
-      aws_api_gateway_rest_api.this[0].deployment_id
-    ]
   }
 }
 
@@ -168,6 +165,12 @@ resource "aws_api_gateway_stage" "this" {
   stage_name    = local.api_gateway_stage_name
 
   tags = var.standard_tags
+
+  lifecycle {
+    ignore_changes = [
+      deployment_id
+    ]
+  }
 }
 
 resource "aws_api_gateway_api_key" "this" {
