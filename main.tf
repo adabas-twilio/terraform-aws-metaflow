@@ -44,6 +44,7 @@ module "metaflow-metadata-service" {
   subnet2_id                       = var.subnet2_id
   vpc_cidr_blocks                  = var.vpc_cidr_blocks
   with_public_ip                   = var.with_public_ip
+  permissions_boundary             = var.permissions_boundary
 
   standard_tags = var.tags
 }
@@ -70,6 +71,7 @@ module "metaflow-ui" {
   ui_static_container_image       = local.ui_static_container_image
   alb_internal                    = var.ui_alb_internal
   ui_allow_list                   = var.ui_allow_list
+  permissions_boundary            = var.permissions_boundary
 
   METAFLOW_DATASTORE_SYSROOT_S3      = module.metaflow-datastore.METAFLOW_DATASTORE_SYSROOT_S3
   certificate_arn                    = var.ui_certificate_arn
@@ -100,6 +102,7 @@ module "metaflow-computation" {
   launch_template_http_tokens                 = var.launch_template_http_tokens
   launch_template_http_put_response_hop_limit = var.launch_template_http_put_response_hop_limit
   compute_environment_allocation_strategy     = var.compute_environment_allocation_strategy
+  permissions_boundary                        = var.permissions_boundary
 
   standard_tags = var.tags
 }
@@ -110,11 +113,12 @@ module "metaflow-step-functions" {
   resource_prefix = local.resource_prefix
   resource_suffix = local.resource_suffix
 
-  active              = var.enable_step_functions
-  batch_job_queue_arn = module.metaflow-computation.METAFLOW_BATCH_JOB_QUEUE
-  iam_partition       = var.iam_partition
-  s3_bucket_arn       = module.metaflow-datastore.s3_bucket_arn
-  s3_bucket_kms_arn   = module.metaflow-datastore.datastore_s3_bucket_kms_key_arn
+  active               = var.enable_step_functions
+  batch_job_queue_arn  = module.metaflow-computation.METAFLOW_BATCH_JOB_QUEUE
+  iam_partition        = var.iam_partition
+  s3_bucket_arn        = module.metaflow-datastore.s3_bucket_arn
+  s3_bucket_kms_arn    = module.metaflow-datastore.datastore_s3_bucket_kms_key_arn
+  permissions_boundary = var.permissions_boundary
 
   standard_tags = var.tags
 }

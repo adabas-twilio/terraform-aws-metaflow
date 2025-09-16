@@ -23,6 +23,8 @@ resource "aws_iam_role" "batch_execution_role" {
 
   assume_role_policy = data.aws_iam_policy_document.batch_execution_role_assume_role.json
 
+  permissions_boundary = var.permissions_boundary
+
   tags = var.standard_tags
 }
 

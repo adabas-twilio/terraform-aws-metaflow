@@ -216,3 +216,9 @@ variable "s3_bucket_name" {
   type    = string
   default = ""
 }
+
+variable "permissions_boundary" {
+  type        = string
+  description = "ARN of the policy that is used to set the permissions boundary for IAM roles"
+  default     = null
+}

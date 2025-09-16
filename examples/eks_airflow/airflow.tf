@@ -40,6 +40,12 @@ variable "airflow_webserver_secret" {
   default = "mysupersecr3tv0lue"
 }
 
+variable "permissions_boundary" {
+  type        = string
+  description = "ARN of the policy that is used to set the permissions boundary for IAM roles"
+  default     = null
+}
+
 # This secret is that the airflow webserver used to sign session cookies.
 # https://airflow.apache.org/docs/helm-chart/stable/production-guide.html#webserver-secret-key
 resource "kubernetes_secret" "airflow-webserver-secret" {

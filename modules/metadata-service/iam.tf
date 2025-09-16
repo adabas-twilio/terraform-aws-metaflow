@@ -21,6 +21,8 @@ resource "aws_iam_role" "metadata_svc_ecs_task_role" {
   description        = "This role is passed to AWS ECS' task definition as the `task_role`. This allows the running of the Metaflow Metadata Service to have the proper permissions to speak to other AWS resources."
   assume_role_policy = data.aws_iam_policy_document.metadata_svc_ecs_task_assume_role.json
 
+  permissions_boundary = var.permissions_boundary
+
   tags = var.standard_tags
 }
 

@@ -33,6 +33,8 @@ resource "aws_iam_role" "eventbridge_role" {
   description        = "IAM role for Amazon EventBridge to access AWS Step Functions."
   assume_role_policy = data.aws_iam_policy_document.eventbridge_assume_role_policy.json
 
+  permissions_boundary = var.permissions_boundary
+
   tags = var.standard_tags
 }
 

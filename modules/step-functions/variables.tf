@@ -39,3 +39,9 @@ variable "standard_tags" {
   type        = map(string)
   description = "The standard tags to apply to every AWS resource."
 }
+
+variable "permissions_boundary" {
+  type        = string
+  description = "ARN of the policy that is used to set the permissions boundary for IAM roles"
+  default     = null
+}

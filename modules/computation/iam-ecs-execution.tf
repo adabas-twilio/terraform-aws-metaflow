@@ -24,6 +24,8 @@ resource "aws_iam_role" "ecs_execution_role" {
   description        = "This role is passed to our AWS ECS' task definition as the `execution_role`. This allows things like the correct image to be pulled and logs to be stored."
   assume_role_policy = data.aws_iam_policy_document.ecs_execution_role_assume_role.json
 
+  permissions_boundary = var.permissions_boundary
+
   tags = var.standard_tags
 }
 

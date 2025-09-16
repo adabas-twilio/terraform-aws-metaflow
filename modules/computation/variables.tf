@@ -102,3 +102,9 @@ variable "launch_template_image_id" {
   nullable    = true
   default     = null
 }
+
+variable "permissions_boundary" {
+  type        = string
+  description = "ARN of the policy that is used to set the permissions boundary for IAM roles"
+  default     = null
+}

@@ -143,6 +143,8 @@ resource "aws_iam_role" "step_functions_role" {
   description        = "IAM role for AWS Step Functions to access AWS resources (AWS Batch, AWS DynamoDB)."
   assume_role_policy = data.aws_iam_policy_document.step_functions_assume_role_policy.json
 
+  permissions_boundary = var.permissions_boundary
+
   tags = var.standard_tags
 }
 

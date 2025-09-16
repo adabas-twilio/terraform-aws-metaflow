@@ -17,6 +17,8 @@ resource "aws_iam_role" "lambda_ecs_execute_role" {
   name               = local.lambda_ecs_execute_role_name
   assume_role_policy = data.aws_iam_policy_document.lambda_ecs_execute_role.json
 
+  permissions_boundary = var.permissions_boundary
+
   tags = var.standard_tags
 }
 
