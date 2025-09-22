@@ -126,3 +126,9 @@ variable "create_service_linked_roles" {
   description = "Whether to create service-linked roles for Auto Scaling and ECS. When false (default), existing service-linked roles will be referenced via data sources. Set to true only if the roles don't exist and Terraform has permissions to create them."
   default     = false
 }
+
+variable "compute_env_prefer_prefix_over_name" {
+  type        = bool
+  description = "Whether to use compute_environment_name_prefix instead of compute_environment_name. When true, the compute environment name will be prefixed with the resource_prefix and resource_suffix. When false, the compute environment name will be the same as the resource_prefix and resource_suffix."
+  default     = true
+}

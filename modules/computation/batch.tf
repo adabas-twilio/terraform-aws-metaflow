@@ -9,7 +9,8 @@ resource "aws_batch_compute_environment" "this_inline" {
      just used compute_environment_name, then there would be a conflict when we went to stand up the new
      compute_environment that had the modifications applied and the process would fail.
   */
-  compute_environment_name_prefix = local.compute_env_prefix_name
+  compute_environment_name_prefix = var.compute_env_prefer_prefix_over_name ? local.compute_env_prefix_name : null
+  compute_environment_name        = var.compute_env_prefer_prefix_over_name ? null : local.compute_env_prefix_name
 
   # Give permissions so the batch service can make API calls.
   service_role = aws_iam_role.batch_execution_role.arn
@@ -82,7 +83,8 @@ resource "aws_batch_compute_environment" "this_inline" {
 resource "aws_batch_compute_environment" "this_independent" {
   count = var.use_inline_policies ? 0 : 1
 
-  compute_environment_name_prefix = local.compute_env_prefix_name
+  compute_environment_name_prefix = var.compute_env_prefer_prefix_over_name ? local.compute_env_prefix_name : null
+  compute_environment_name        = var.compute_env_prefer_prefix_over_name ? null : local.compute_env_prefix_name
 
   # Give permissions so the batch service can make API calls.
   service_role = aws_iam_role.batch_execution_role.arn

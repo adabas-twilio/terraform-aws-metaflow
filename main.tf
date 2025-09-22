@@ -112,6 +112,7 @@ module "metaflow-computation" {
   use_inline_policies                         = var.use_inline_policies
   batch_compute_security_group_id             = var.batch_compute_security_group_id
   create_service_linked_roles                 = var.create_service_linked_roles
+  compute_env_prefer_prefix_over_name         = var.compute_env_prefer_prefix_over_name
 
   standard_tags = var.tags
 }
