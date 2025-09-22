@@ -1,41 +1,5 @@
-resource "aws_security_group" "fargate_security_group" {
-  name        = local.ui_backend_security_group_name
-  description = "Security Group for Fargate which runs the UI Backend."
-  vpc_id      = var.metaflow_vpc_id
-
-  ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = -1
-    security_groups = [aws_security_group.ui_lb_security_group.id]
-  }
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    self        = true
-    description = "Internal communication"
-  }
-
-  # egress to anywhere
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1" # all
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all external communication"
-  }
-
-  tags = merge(
-    var.standard_tags,
-    {
-      Metaflow = "true"
-    }
-  )
-}
-
 resource "aws_security_group" "ui_lb_security_group" {
+  count       = var.ui_lb_security_group_id == null ? 1 : 0
   name        = local.alb_security_group_name
   description = "Security Group for ALB"
   vpc_id      = var.metaflow_vpc_id
@@ -73,13 +37,59 @@ resource "aws_security_group" "ui_lb_security_group" {
   )
 }
 
+locals {
+  ui_lb_security_group_id = var.ui_lb_security_group_id != null ? var.ui_lb_security_group_id : aws_security_group.ui_lb_security_group[0].id
+}
+
+resource "aws_security_group" "fargate_security_group" {
+  count       = var.ui_backend_security_group_id == null ? 1 : 0
+  name        = local.ui_backend_security_group_name
+  description = "Security Group for Fargate which runs the UI Backend."
+  vpc_id      = var.metaflow_vpc_id
+
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = -1
+    security_groups = [local.ui_lb_security_group_id]
+  }
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    self        = true
+    description = "Internal communication"
+  }
+
+  # egress to anywhere
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1" # all
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all external communication"
+  }
+
+  tags = merge(
+    var.standard_tags,
+    {
+      Metaflow = "true"
+    }
+  )
+}
+
+locals {
+  ui_backend_security_group_id = var.ui_backend_security_group_id != null ? var.ui_backend_security_group_id : aws_security_group.fargate_security_group[0].id
+}
+
 resource "aws_lb" "this" {
   name               = "${var.resource_prefix}alb${var.resource_suffix}"
   internal           = var.alb_internal
   load_balancer_type = "application"
   subnets            = [var.subnet1_id, var.subnet2_id]
   security_groups = [
-    aws_security_group.ui_lb_security_group.id
+    local.ui_lb_security_group_id
   ]
 
   tags = var.standard_tags

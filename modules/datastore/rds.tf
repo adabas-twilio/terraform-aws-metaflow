@@ -20,6 +20,7 @@ resource "aws_db_subnet_group" "this" {
  Define a new firewall for our database instance.
 */
 resource "aws_security_group" "rds_security_group" {
+  count  = var.rds_security_group_id == null ? 1 : 0
   name   = local.rds_security_group_name
   vpc_id = var.metaflow_vpc_id
 
@@ -40,6 +41,10 @@ resource "aws_security_group" "rds_security_group" {
   }
 
   tags = var.standard_tags
+}
+
+locals {
+  rds_security_group_id = var.rds_security_group_id != null ? var.rds_security_group_id : aws_security_group.rds_security_group[0].id
 }
 
 resource "random_password" "this" {
@@ -72,7 +77,7 @@ resource "aws_rds_cluster" "this" {
   storage_encrypted = true
 
   final_snapshot_identifier = "${var.resource_prefix}${var.db_name}-final-snapshot${var.resource_suffix}-${random_pet.final_snapshot_id.id}" # Snapshot upon delete
-  vpc_security_group_ids    = [aws_security_group.rds_security_group.id]
+  vpc_security_group_ids    = [local.rds_security_group_id]
 
   tags = merge(
     var.standard_tags,
@@ -113,7 +118,7 @@ resource "aws_db_instance" "this" {
   max_allocated_storage     = 1000                                                                                                           # Upper limit of automatic scaled storage
   multi_az                  = true                                                                                                           # Multiple availability zone?
   final_snapshot_identifier = "${var.resource_prefix}${var.db_name}-final-snapshot${var.resource_suffix}-${random_pet.final_snapshot_id.id}" # Snapshot upon delete
-  vpc_security_group_ids    = [aws_security_group.rds_security_group.id]
+  vpc_security_group_ids    = [local.rds_security_group_id]
 
   tags = merge(
     var.standard_tags,

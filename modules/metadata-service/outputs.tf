@@ -24,7 +24,7 @@ output "migration_function_arn" {
 }
 
 output "metadata_service_security_group_id" {
-  value       = aws_security_group.metadata_service_security_group.id
+  value       = local.metadata_service_security_group_id
   description = "The security group ID used by the MetaData service. We'll grant this access to our DB."
 }
 

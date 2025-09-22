@@ -75,7 +75,7 @@ resource "aws_ecs_service" "this" {
   enable_execute_command = true
 
   network_configuration {
-    security_groups  = [aws_security_group.metadata_service_security_group.id]
+    security_groups  = [local.metadata_service_security_group_id]
     assign_public_ip = var.with_public_ip
     subnets          = [var.subnet1_id, var.subnet2_id]
   }

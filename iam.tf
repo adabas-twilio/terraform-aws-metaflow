@@ -202,51 +202,165 @@ data "aws_iam_policy_document" "cloudwatch" {
   }
 }
 
+# Inline IAM Policies for batch_s3_task_role (when use_inline_policies = true)
 resource "aws_iam_role_policy" "grant_custom_s3_list_batch" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "s3_list"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.custom_s3_list_batch.json
 }
 
 resource "aws_iam_role_policy" "grant_custom_s3_batch" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "custom_s3"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.custom_s3_batch.json
 }
 
 resource "aws_iam_role_policy" "grant_s3_kms" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "s3_kms"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.s3_kms.json
 }
 
 resource "aws_iam_role_policy" "grant_deny_presigned_batch" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "deny_presigned"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.deny_presigned_batch.json
 }
 
 resource "aws_iam_role_policy" "grant_allow_sagemaker" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "sagemaker"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.allow_sagemaker.json
 }
 
 resource "aws_iam_role_policy" "grant_iam_pass_role" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "iam_pass_role"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.iam_pass_role.json
 }
 
 resource "aws_iam_role_policy" "grant_dynamodb" {
-  count  = var.enable_step_functions ? 1 : 0
+  count  = var.use_inline_policies && var.enable_step_functions ? 1 : 0
   name   = "dynamodb"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.dynamodb.json
 }
 
 resource "aws_iam_role_policy" "grant_cloudwatch" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "cloudwatch"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.cloudwatch.json
+}
+
+# Independent IAM Policies for batch_s3_task_role (when use_inline_policies = false)
+resource "aws_iam_policy" "batch_s3_list_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.batch_s3_task_role_name}-s3-list"
+  policy = data.aws_iam_policy_document.custom_s3_list_batch.json
+  tags   = var.tags
+}
+
+resource "aws_iam_policy" "batch_s3_custom_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.batch_s3_task_role_name}-custom-s3"
+  policy = data.aws_iam_policy_document.custom_s3_batch.json
+  tags   = var.tags
+}
+
+resource "aws_iam_policy" "batch_s3_kms_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.batch_s3_task_role_name}-s3-kms"
+  policy = data.aws_iam_policy_document.s3_kms.json
+  tags   = var.tags
+}
+
+resource "aws_iam_policy" "batch_deny_presigned_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.batch_s3_task_role_name}-deny-presigned"
+  policy = data.aws_iam_policy_document.deny_presigned_batch.json
+  tags   = var.tags
+}
+
+resource "aws_iam_policy" "batch_sagemaker_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.batch_s3_task_role_name}-sagemaker"
+  policy = data.aws_iam_policy_document.allow_sagemaker.json
+  tags   = var.tags
+}
+
+resource "aws_iam_policy" "batch_iam_pass_role_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.batch_s3_task_role_name}-iam-pass-role"
+  policy = data.aws_iam_policy_document.iam_pass_role.json
+  tags   = var.tags
+}
+
+resource "aws_iam_policy" "batch_dynamodb_policy" {
+  count  = !var.use_inline_policies && var.enable_step_functions ? 1 : 0
+  name   = "${local.batch_s3_task_role_name}-dynamodb"
+  policy = data.aws_iam_policy_document.dynamodb.json
+  tags   = var.tags
+}
+
+resource "aws_iam_policy" "batch_cloudwatch_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.batch_s3_task_role_name}-cloudwatch"
+  policy = data.aws_iam_policy_document.cloudwatch.json
+  tags   = var.tags
+}
+
+# Policy Attachments for batch_s3_task_role (when use_inline_policies = false)
+resource "aws_iam_role_policy_attachment" "batch_s3_list_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.batch_s3_task_role.name
+  policy_arn = aws_iam_policy.batch_s3_list_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "batch_s3_custom_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.batch_s3_task_role.name
+  policy_arn = aws_iam_policy.batch_s3_custom_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "batch_s3_kms_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.batch_s3_task_role.name
+  policy_arn = aws_iam_policy.batch_s3_kms_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "batch_deny_presigned_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.batch_s3_task_role.name
+  policy_arn = aws_iam_policy.batch_deny_presigned_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "batch_sagemaker_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.batch_s3_task_role.name
+  policy_arn = aws_iam_policy.batch_sagemaker_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "batch_iam_pass_role_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.batch_s3_task_role.name
+  policy_arn = aws_iam_policy.batch_iam_pass_role_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "batch_dynamodb_attachment" {
+  count      = !var.use_inline_policies && var.enable_step_functions ? 1 : 0
+  role       = aws_iam_role.batch_s3_task_role.name
+  policy_arn = aws_iam_policy.batch_dynamodb_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "batch_cloudwatch_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.batch_s3_task_role.name
+  policy_arn = aws_iam_policy.batch_cloudwatch_policy[0].arn
 }

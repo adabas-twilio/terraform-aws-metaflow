@@ -132,3 +132,15 @@ variable "permissions_boundary" {
   description = "ARN of the policy that is used to set the permissions boundary for IAM roles"
   default     = null
 }
+
+variable "use_inline_policies" {
+  type        = bool
+  description = "Whether to use inline IAM policies (true) or independent IAM policies with attachments (false)"
+  default     = true
+}
+
+variable "metadata_service_security_group_id" {
+  type        = string
+  description = "ID of existing security group for Metadata service. If not provided, a new security group will be created."
+  default     = null
+}

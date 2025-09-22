@@ -76,3 +76,9 @@ variable "s3_bucket_name" {
   type    = string
   default = ""
 }
+
+variable "rds_security_group_id" {
+  type        = string
+  description = "ID of existing security group for RDS database. If not provided, a new security group will be created."
+  default     = null
+}

@@ -19,6 +19,6 @@ output "ecs_instance_role_arn" {
 }
 
 output "batch_compute_environment_security_group_id" {
-  value       = aws_security_group.this.id
+  value       = local.batch_security_group_id
   description = "The ID of the security group attached to the Batch Compute environment."
 }

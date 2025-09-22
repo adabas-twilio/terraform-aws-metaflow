@@ -1,3 +1,26 @@
+# Reference existing service-linked roles instead of creating them
+# The Auto Scaling service-linked role is typically created automatically by AWS
+# when Auto Scaling is first used in an account, or can be pre-created manually
+data "aws_iam_role" "autoscaling_service_linked_role" {
+  name = "AWSServiceRoleForAutoScaling"
+}
+
+# Only create the service-linked role if explicitly requested and it doesn't exist
+resource "aws_iam_service_linked_role" "autoscaling" {
+  count            = var.create_service_linked_roles ? 1 : 0
+  aws_service_name = "autoscaling.amazonaws.com"
+  custom_suffix    = ""
+  description      = "Service-linked role for Auto Scaling used by AWS Batch"
+  lifecycle {
+    ignore_changes = [tags, tags_all]
+  }
+}
+
+# Reference existing ECS service-linked role
+data "aws_iam_role" "ecs_service_linked_role" {
+  name = "AWSServiceRoleForECS"
+}
+
 data "aws_iam_policy_document" "batch_execution_role_assume_role" {
   statement {
     actions = [
@@ -122,21 +145,25 @@ data "aws_iam_policy_document" "custom_access_policy" {
 }
 
 data "aws_iam_policy_document" "iam_custom_policies" {
-  statement {
-    actions = [
-      "iam:CreateServiceLinkedRole"
-    ]
+  # Only include CreateServiceLinkedRole permission if we're not pre-creating the roles
+  dynamic "statement" {
+    for_each = var.create_service_linked_roles ? [] : [1]
+    content {
+      actions = [
+        "iam:CreateServiceLinkedRole"
+      ]
 
-    effect = "Allow"
+      effect = "Allow"
 
-    resources = [
-      "*",
-    ]
+      resources = [
+        "*",
+      ]
 
-    condition {
-      test     = "StringEquals"
-      variable = "iam:AWSServiceName"
-      values   = ["autoscaling.amazonaws.com", "ecs.amazonaws.com"]
+      condition {
+        test     = "StringEquals"
+        variable = "iam:AWSServiceName"
+        values   = ["autoscaling.amazonaws.com", "ecs.amazonaws.com"]
+      }
     }
   }
 }
@@ -161,26 +188,85 @@ data "aws_iam_policy_document" "ec2_custom_policies" {
   }
 }
 
+# Inline IAM Policies for batch_execution_role (when use_inline_policies = true)
 resource "aws_iam_role_policy" "grant_iam_pass_role" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "iam_pass_role"
   role   = aws_iam_role.batch_execution_role.name
   policy = data.aws_iam_policy_document.iam_pass_role.json
 }
 
 resource "aws_iam_role_policy" "grant_custom_access_policy" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "custom_access"
   role   = aws_iam_role.batch_execution_role.name
   policy = data.aws_iam_policy_document.custom_access_policy.json
 }
 
 resource "aws_iam_role_policy" "grant_iam_custom_policies" {
+  count  = var.use_inline_policies && !var.create_service_linked_roles ? 1 : 0
   name   = "iam_custom"
   role   = aws_iam_role.batch_execution_role.name
   policy = data.aws_iam_policy_document.iam_custom_policies.json
 }
 
 resource "aws_iam_role_policy" "grant_ec2_custom_policies" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "ec2_custom"
   role   = aws_iam_role.batch_execution_role.name
   policy = data.aws_iam_policy_document.ec2_custom_policies.json
+}
+
+# Independent IAM Policies for batch_execution_role (when use_inline_policies = false)
+resource "aws_iam_policy" "batch_execution_iam_pass_role_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.batch_execution_role_name}-iam-pass-role"
+  policy = data.aws_iam_policy_document.iam_pass_role.json
+  tags   = var.standard_tags
+}
+
+resource "aws_iam_policy" "batch_execution_custom_access_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.batch_execution_role_name}-custom-access"
+  policy = data.aws_iam_policy_document.custom_access_policy.json
+  tags   = var.standard_tags
+}
+
+resource "aws_iam_policy" "batch_execution_iam_custom_policy" {
+  count  = !var.use_inline_policies && !var.create_service_linked_roles ? 1 : 0
+  name   = "${local.batch_execution_role_name}-iam-custom"
+  policy = data.aws_iam_policy_document.iam_custom_policies.json
+  tags   = var.standard_tags
+}
+
+resource "aws_iam_policy" "batch_execution_ec2_custom_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.batch_execution_role_name}-ec2-custom"
+  policy = data.aws_iam_policy_document.ec2_custom_policies.json
+  tags   = var.standard_tags
+}
+
+# Policy Attachments for batch_execution_role (when use_inline_policies = false)
+resource "aws_iam_role_policy_attachment" "batch_execution_iam_pass_role_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.batch_execution_role.name
+  policy_arn = aws_iam_policy.batch_execution_iam_pass_role_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "batch_execution_custom_access_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.batch_execution_role.name
+  policy_arn = aws_iam_policy.batch_execution_custom_access_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "batch_execution_iam_custom_attachment" {
+  count      = !var.use_inline_policies && !var.create_service_linked_roles ? 1 : 0
+  role       = aws_iam_role.batch_execution_role.name
+  policy_arn = aws_iam_policy.batch_execution_iam_custom_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "batch_execution_ec2_custom_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.batch_execution_role.name
+  policy_arn = aws_iam_policy.batch_execution_ec2_custom_policy[0].arn
 }

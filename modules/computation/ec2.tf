@@ -34,6 +34,11 @@ resource "aws_launch_template" "cpu" {
     http_put_response_hop_limit = var.launch_template_http_put_response_hop_limit
   }
 
+  tag_specifications {
+    resource_type = "instance"
+    tags          = var.standard_tags
+  }
+
   tags = var.standard_tags
 }
 
@@ -50,6 +55,7 @@ resource "aws_iam_instance_profile" "ecs_instance_role" {
 }
 
 resource "aws_security_group" "this" {
+  count  = var.batch_compute_security_group_id == null ? 1 : 0
   name   = local.batch_security_group_name
   vpc_id = var.metaflow_vpc_id
 
@@ -67,4 +73,10 @@ resource "aws_security_group" "this" {
     self        = true
     description = "internal traffic"
   }
+
+  tags = var.standard_tags
+}
+
+locals {
+  batch_security_group_id = var.batch_compute_security_group_id != null ? var.batch_compute_security_group_id : aws_security_group.this[0].id
 }

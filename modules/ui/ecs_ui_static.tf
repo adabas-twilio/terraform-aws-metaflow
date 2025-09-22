@@ -51,7 +51,7 @@ resource "aws_ecs_service" "ui_static" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    security_groups  = [aws_security_group.fargate_security_group.id]
+    security_groups  = [local.ui_backend_security_group_id]
     assign_public_ip = true
     subnets          = [var.subnet1_id, var.subnet2_id]
   }

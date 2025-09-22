@@ -1,4 +1,5 @@
 resource "aws_security_group" "metadata_service_security_group" {
+  count       = var.metadata_service_security_group_id == null ? 1 : 0
   name        = local.metadata_service_security_group_name
   description = "Security Group for Fargate which runs the Metadata Service."
   vpc_id      = var.metaflow_vpc_id
@@ -42,6 +43,10 @@ resource "aws_security_group" "metadata_service_security_group" {
       Metaflow = "true"
     }
   )
+}
+
+locals {
+  metadata_service_security_group_id = var.metadata_service_security_group_id != null ? var.metadata_service_security_group_id : aws_security_group.metadata_service_security_group[0].id
 }
 
 resource "aws_lb" "this" {

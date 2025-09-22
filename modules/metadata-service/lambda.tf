@@ -68,16 +68,47 @@ data "aws_iam_policy_document" "lambda_ecs_task_execute_policy_vpc" {
   }
 }
 
+# Inline IAM Policies for lambda_ecs_execute_role (when use_inline_policies = true)
 resource "aws_iam_role_policy" "grant_lambda_ecs_cloudwatch" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "cloudwatch"
   role   = aws_iam_role.lambda_ecs_execute_role.name
   policy = data.aws_iam_policy_document.lambda_ecs_task_execute_policy_cloudwatch.json
 }
 
 resource "aws_iam_role_policy" "grant_lambda_ecs_vpc" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "ecs_task_execute"
   role   = aws_iam_role.lambda_ecs_execute_role.name
   policy = data.aws_iam_policy_document.lambda_ecs_task_execute_policy_vpc.json
+}
+
+# Independent IAM Policies for lambda_ecs_execute_role (when use_inline_policies = false)
+resource "aws_iam_policy" "lambda_ecs_cloudwatch_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.lambda_ecs_execute_role_name}-cloudwatch"
+  policy = data.aws_iam_policy_document.lambda_ecs_task_execute_policy_cloudwatch.json
+  tags   = var.standard_tags
+}
+
+resource "aws_iam_policy" "lambda_ecs_vpc_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.lambda_ecs_execute_role_name}-ecs-task-execute"
+  policy = data.aws_iam_policy_document.lambda_ecs_task_execute_policy_vpc.json
+  tags   = var.standard_tags
+}
+
+# Policy Attachments for lambda_ecs_execute_role (when use_inline_policies = false)
+resource "aws_iam_role_policy_attachment" "lambda_ecs_cloudwatch_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.lambda_ecs_execute_role.name
+  policy_arn = aws_iam_policy.lambda_ecs_cloudwatch_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_ecs_vpc_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.lambda_ecs_execute_role.name
+  policy_arn = aws_iam_policy.lambda_ecs_vpc_policy[0].arn
 }
 
 data "archive_file" "db_migrate_lambda" {
@@ -132,6 +163,6 @@ resource "aws_lambda_function" "db_migrate_lambda" {
 
   vpc_config {
     subnet_ids         = [var.subnet1_id, var.subnet2_id]
-    security_group_ids = [aws_security_group.metadata_service_security_group.id]
+    security_group_ids = [local.metadata_service_security_group_id]
   }
 }

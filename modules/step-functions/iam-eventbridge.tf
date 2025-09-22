@@ -38,9 +38,25 @@ resource "aws_iam_role" "eventbridge_role" {
   tags = var.standard_tags
 }
 
+# Inline IAM Policy for eventbridge_role (when use_inline_policies = true)
 resource "aws_iam_role_policy" "eventbridge_step_functions_policy" {
-  count  = var.active ? 1 : 0
+  count  = var.active && var.use_inline_policies ? 1 : 0
   name   = "step_functions"
   role   = aws_iam_role.eventbridge_role[0].id
   policy = data.aws_iam_policy_document.eventbridge_step_functions_policy.json
+}
+
+# Independent IAM Policy for eventbridge_role (when use_inline_policies = false)
+resource "aws_iam_policy" "eventbridge_step_functions_policy" {
+  count  = var.active && !var.use_inline_policies ? 1 : 0
+  name   = "${var.resource_prefix}eventbridge_role${var.resource_suffix}-step-functions"
+  policy = data.aws_iam_policy_document.eventbridge_step_functions_policy.json
+  tags   = var.standard_tags
+}
+
+# Policy Attachment for eventbridge_role (when use_inline_policies = false)
+resource "aws_iam_role_policy_attachment" "eventbridge_step_functions_attachment" {
+  count      = var.active && !var.use_inline_policies ? 1 : 0
+  role       = aws_iam_role.eventbridge_role[0].id
+  policy_arn = aws_iam_policy.eventbridge_step_functions_policy[0].arn
 }

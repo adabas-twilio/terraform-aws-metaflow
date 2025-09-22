@@ -108,3 +108,21 @@ variable "permissions_boundary" {
   description = "ARN of the policy that is used to set the permissions boundary for IAM roles"
   default     = null
 }
+
+variable "use_inline_policies" {
+  type        = bool
+  description = "Whether to use inline IAM policies (true) or independent IAM policies with attachments (false)"
+  default     = true
+}
+
+variable "batch_compute_security_group_id" {
+  type        = string
+  description = "ID of existing security group for Batch compute environment. If not provided, a new security group will be created."
+  default     = null
+}
+
+variable "create_service_linked_roles" {
+  type        = bool
+  description = "Whether to create service-linked roles for Auto Scaling and ECS. When false (default), existing service-linked roles will be referenced via data sources. Set to true only if the roles don't exist and Terraform has permissions to create them."
+  default     = false
+}

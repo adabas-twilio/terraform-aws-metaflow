@@ -50,8 +50,25 @@ data "aws_iam_policy_document" "ecs_task_execution_policy" {
   }
 }
 
+# Inline IAM Policy for ecs_execution_role (when use_inline_policies = true)
 resource "aws_iam_role_policy" "grant_ecs_access" {
+  count  = var.use_inline_policies ? 1 : 0
   name   = "ecs_access"
   role   = aws_iam_role.ecs_execution_role.name
   policy = data.aws_iam_policy_document.ecs_task_execution_policy.json
+}
+
+# Independent IAM Policy for ecs_execution_role (when use_inline_policies = false)
+resource "aws_iam_policy" "ecs_execution_access_policy" {
+  count  = var.use_inline_policies ? 0 : 1
+  name   = "${local.ecs_execution_role_name}-ecs-access"
+  policy = data.aws_iam_policy_document.ecs_task_execution_policy.json
+  tags   = var.standard_tags
+}
+
+# Policy Attachment for ecs_execution_role (when use_inline_policies = false)
+resource "aws_iam_role_policy_attachment" "ecs_execution_access_attachment" {
+  count      = var.use_inline_policies ? 0 : 1
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = aws_iam_policy.ecs_execution_access_policy[0].arn
 }
