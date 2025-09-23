@@ -95,7 +95,7 @@ data "aws_iam_policy_document" "custom_access_policy" {
       "ec2:CancelSpotFleetRequests",
       "ec2:ModifySpotFleetRequest",
       "ec2:TerminateInstances",
-      # "ec2:RunInstances",
+      "ec2:RunInstances",
       "autoscaling:DescribeAccountLimits",
       "autoscaling:DescribeAutoScalingGroups",
       "autoscaling:DescribeLaunchConfigurations",
