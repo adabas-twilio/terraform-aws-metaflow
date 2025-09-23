@@ -9,6 +9,8 @@ resource "aws_launch_template" "cpu" {
   */
   name = "${var.resource_prefix}batch-launch-tmpl-cpu-100gb${var.resource_suffix}"
 
+  instance_type = !local.enable_fargate_on_batch ? var.compute_environment_instance_types[0] : null
+
   # Defines what IAM Role to assume to grant an Amazon EC2 instance
   # This role must have a policy to access the kms_key_id used to encrypt the EBS volume
   iam_instance_profile {
@@ -36,6 +38,11 @@ resource "aws_launch_template" "cpu" {
 
   tag_specifications {
     resource_type = "instance"
+    tags          = var.standard_tags
+  }
+
+  tag_specifications {
+    resource_type = "volume"
     tags          = var.standard_tags
   }
 
