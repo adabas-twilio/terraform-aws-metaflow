@@ -89,7 +89,7 @@ data "aws_iam_policy_document" "custom_access_policy" {
       "ec2:DescribeSpotPriceHistory",
       "ec2:DescribeVpcClassicLink",
       "ec2:DescribeLaunchTemplateVersions",
-      # "ec2:CreateLaunchTemplate",
+      "ec2:CreateLaunchTemplate",
       "ec2:DeleteLaunchTemplate",
       "ec2:RequestSpotFleet",
       "ec2:CancelSpotFleetRequests",
