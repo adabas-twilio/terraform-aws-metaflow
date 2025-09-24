@@ -46,6 +46,11 @@ resource "aws_launch_template" "cpu" {
     tags          = var.standard_tags
   }
 
+  tag_specifications {
+    resource_type = "network-interface"
+    tags          = var.standard_tags
+  }
+
   tags = var.standard_tags
 }
 
