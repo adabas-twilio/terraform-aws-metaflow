@@ -43,10 +43,10 @@ output "METAFLOW_SFN_IAM_ROLE" {
   description = "IAM role for AWS Step Functions to access AWS resources (AWS Batch, AWS DynamoDB)."
 }
 
-output "api_gateway_rest_api_id_key_id" {
-  value       = module.metaflow-metadata-service.api_gateway_rest_api_id_key_id
-  description = "API Gateway Key ID for Metadata Service. Fetch Key from AWS Console [METAFLOW_SERVICE_AUTH_KEY]"
-}
+# output "api_gateway_rest_api_id_key_id" {
+#   value       = module.metaflow-metadata-service.api_gateway_rest_api_id_key_id
+#   description = "API Gateway Key ID for Metadata Service. Fetch Key from AWS Console [METAFLOW_SERVICE_AUTH_KEY]"
+# }
 
 output "datastore_s3_bucket_kms_key_arn" {
   value       = module.metaflow-datastore.datastore_s3_bucket_kms_key_arn
@@ -73,9 +73,6 @@ output "metaflow_profile_json" {
       var.enable_custom_batch_container_registry ? {
         "METAFLOW_BATCH_CONTAINER_REGISTRY" = element(split("/", aws_ecr_repository.metaflow_batch_image[0].repository_url), 0),
         "METAFLOW_BATCH_CONTAINER_IMAGE"    = element(split("/", aws_ecr_repository.metaflow_batch_image[0].repository_url), 1)
-      } : {},
-      var.metadata_service_enable_api_basic_auth ? {
-        "METAFLOW_SERVICE_AUTH_KEY" = "## Replace with output from 'aws apigateway get-api-key --api-key ${module.metaflow-metadata-service.api_gateway_rest_api_id_key_id} --include-value | grep value' ##"
       } : {},
       var.batch_type == "fargate" ? {
         "METAFLOW_ECS_FARGATE_EXECUTION_ROLE" = module.metaflow-computation.ecs_execution_role_arn
