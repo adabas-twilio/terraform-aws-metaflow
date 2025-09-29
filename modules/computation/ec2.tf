@@ -18,8 +18,10 @@ resource "aws_launch_template" "cpu" {
   }
 
   network_interfaces {
-    subnet_id       = var.subnet1_id
-    security_groups = [local.batch_security_group_id]
+    associate_public_ip_address = true
+    delete_on_termination       = true
+    subnet_id                   = var.subnet1_id
+    security_groups             = [local.batch_security_group_id]
   }
 
   # Null image_id allows AWS Batch to decide.
