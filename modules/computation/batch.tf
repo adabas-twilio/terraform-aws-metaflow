@@ -127,9 +127,9 @@ resource "aws_batch_compute_environment" "this_independent" {
     }
 
     # Security group to apply to the instances launched.
-    security_group_ids = concat([
-      local.batch_security_group_id,
-    ], var.compute_environment_additional_security_group_ids)
+    # security_group_ids = concat([
+    #   local.batch_security_group_id,
+    # ], var.compute_environment_additional_security_group_ids)
 
     # Which subnet to launch the instances into.
     subnets = [
