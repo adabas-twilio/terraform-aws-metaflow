@@ -16,7 +16,7 @@ locals {
   batch_execution_role_name = "${var.resource_prefix}batch-execution-role${var.resource_suffix}"
 
   # Name of ECS IAM role
-  ecs_instance_role_name = "${var.resource_prefix}ecs-iam-role${var.resource_suffix}"
+  ecs_instance_role_name = var.ecs_instance_role_name_custom_name != "" ? var.ecs_instance_role_name_custom_name : "${var.resource_prefix}ecs-iam-role${var.resource_suffix}"
 
   enable_fargate_on_batch = var.batch_type == "fargate"
 }

@@ -132,3 +132,9 @@ variable "compute_env_prefer_prefix_over_name" {
   description = "Whether to use compute_environment_name_prefix instead of compute_environment_name. When true, the compute environment name will be prefixed with the resource_prefix and resource_suffix. When false, the compute environment name will be the same as the resource_prefix and resource_suffix."
   default     = true
 }
+
+variable "ecs_instance_role_name_custom_name" {
+  type        = string
+  description = "Custom name for the ECS instance role."
+  default     = ""
+}
