@@ -17,6 +17,10 @@ resource "aws_launch_template" "cpu" {
     arn = aws_iam_instance_profile.ecs_instance_role.arn
   }
 
+  network_interfaces {
+    security_groups = [local.batch_security_group_id]
+  }
+
   # Null image_id allows AWS Batch to decide.
   image_id = var.launch_template_image_id
 
