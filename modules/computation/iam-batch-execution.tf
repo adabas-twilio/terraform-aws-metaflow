@@ -1,9 +1,6 @@
 # Reference existing service-linked roles instead of creating them
 # The Auto Scaling service-linked role is typically created automatically by AWS
 # when Auto Scaling is first used in an account, or can be pre-created manually
-data "aws_iam_role" "autoscaling_service_linked_role" {
-  name = "AWSServiceRoleForAutoScaling"
-}
 
 # Only create the service-linked role if explicitly requested and it doesn't exist
 resource "aws_iam_service_linked_role" "autoscaling" {
@@ -14,11 +11,6 @@ resource "aws_iam_service_linked_role" "autoscaling" {
   lifecycle {
     ignore_changes = [tags, tags_all]
   }
-}
-
-# Reference existing ECS service-linked role
-data "aws_iam_role" "ecs_service_linked_role" {
-  name = "AWSServiceRoleForECS"
 }
 
 data "aws_iam_policy_document" "batch_execution_role_assume_role" {
